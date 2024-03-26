@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/schollz/progressbar/v3"
 	"io"
 	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/schollz/progressbar/v3"
 )
 
 func Upload(filePath string, version int, name string, cidOnly bool) (UploadResponse, error) {
@@ -57,6 +58,7 @@ func Upload(filePath string, version int, name string, cidOnly bool) (UploadResp
 		return UploadResponse{}, errors.Join(err, errors.New("failed to send the request"))
 	}
 	if resp.StatusCode != 200 {
+		io.Copy(os.Stderr, resp.Body)
 		return UploadResponse{}, fmt.Errorf("server Returned an error %d", resp.StatusCode)
 	}
 	err = progressBody.bar.Set(int(totalSize))
